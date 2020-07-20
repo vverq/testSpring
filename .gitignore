@@ -1,0 +1,9 @@
+/.metadata
+/testSpring/.settings
+/testSpring/bin
+.idea/
+target/
+libs/
+*.iml
+
+
