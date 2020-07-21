@@ -2,6 +2,10 @@ package vverq.testSpring;
 
 
 import com.opencsv.bean.CsvBindByPosition;
+import org.springframework.cglib.core.internal.Function;
+
+import java.util.HashMap;
+
 
 public class Airport {
     @CsvBindByPosition(position = 0)
@@ -32,6 +36,27 @@ public class Airport {
     private String type;
     @CsvBindByPosition(position = 13)
     private String source;
+
+    private static HashMap<AirportFields, Function<Airport, String>> dick = new HashMap<>(){{
+        put(AirportFields.id, x -> x.id);
+        put(AirportFields.name, x -> x.name);
+        put(AirportFields.city, x -> x.city);
+        put(AirportFields.country, x->x.country);
+        put(AirportFields.IATA, x->x.IATA);
+        put(AirportFields.ICAO, x->x.ICAO);
+        put(AirportFields.latitude, x->x.latitude);
+        put(AirportFields.longitude, x->x.longitude);
+        put(AirportFields.altitude, x->x.altitude);
+        put(AirportFields.timezone, x->x.timezone);
+        put(AirportFields.DST, x->x.DST);
+        put(AirportFields.ianaTZ, x->x.ianaTZ);
+        put(AirportFields.type, x->x.type);
+        put(AirportFields.source, x->x.source);
+    }};
+
+    public String getFieldByName(String field) {
+        return dick.get(AirportFields.getFieldByName(field)).apply(this);
+    }
 
     public Airport() {
 
@@ -168,12 +193,4 @@ public class Airport {
     public void setSource(String source) {
         this.source = source;
     }
-
-//    @Override
-//    public String toString() {
-//        var builder = new StringBuilder();
-//        builder.append("Airport{id=").append(id).append(", name=")
-//                .append(name).append("}");
-//        return builder.toString();
-//    }
 }

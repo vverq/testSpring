@@ -1,11 +1,13 @@
 <html>
 <body>
-        <form method="POST" action=/upload-csv-file enctype="multipart/form-data">
+    <form method="POST" action=/upload-csv-file enctype="multipart/form-data">
     <div class="form-group mt-3">
-        <label for="file">Select a CSV file</label>
-        <input type="file" name="file" class="form-control-file" id="file" accept=".csv">
+        <label for="col">Select a col number plz</label>
+        <input type="number" min=1 max=14 name="col" id="col"><br>
+        <label for="prefix">Input your prefix</label>
+        <input type="text" name="prefix" id="prefix"><br>
     </div>
-    <button type="submit" class="btn btn-primary">Import Users</button>
+    <button type="submit" class="btn btn-primary">Найти!</button>
 </form>
 </body>
 </html>

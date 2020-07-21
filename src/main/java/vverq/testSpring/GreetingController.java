@@ -2,22 +2,16 @@ package vverq.testSpring;
 
 
 import com.opencsv.bean.*;
-import com.samskivert.mustache.Mustache;
-import org.springframework.boot.autoconfigure.mustache.MustacheEnvironmentCollector;
-import org.springframework.context.annotation.Bean;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.List;
-import java.util.Map;
 
 @Controller
 public class GreetingController {
@@ -27,40 +21,47 @@ public class GreetingController {
     }
 
     @PostMapping("/upload-csv-file")
-    public String uploadCSVFile(@RequestParam("file") MultipartFile file, Map<String, Object> model) {
+    public String uploadCSVFile(
+            @RequestParam("col") int col, @RequestParam("prefix") String prefix, Model model) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                new FileInputStream(".\\src\\main\\resources\\1.csv"), StandardCharsets.UTF_8))) {
 
-        // validate file
-        System.out.println(file.getOriginalFilename());
-        if (file.isEmpty()) {
-            model.put("message", "Please select a CSV file to upload.");
-            model.put("status", false);
-        } else {
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
-                ColumnPositionMappingStrategy<Airport> strategy = new ColumnPositionMappingStrategy<>();
-                 String[] fields = {"id", "name", "city", "country", "IATA", "ICAO", "latitude", "longitude", "altitude", "timezone", "DST", "ianaTZ", "type", "source"};
-                 strategy.setType(Airport.class);
-                 strategy.setColumnMapping(fields);
+            ColumnPositionMappingStrategy<Airport> strategy = new ColumnPositionMappingStrategy<>();
+            String[] fields = {
+                    "id", "name", "city", "country", "IATA", "ICAO",
+                    "latitude", "longitude", "altitude", "timezone",
+                    "DST", "ianaTZ", "type", "source"
+            };
+            strategy.setType(Airport.class);
+            strategy.setColumnMapping(fields);
 
-                CsvToBean<Airport> csvToBean = new CsvToBeanBuilder<Airport>(reader)
-                        .withMappingStrategy(strategy)
-                        .withType(Airport.class)
-                        .withSeparator(',')
-                        .withIgnoreQuotations(true)
-                        .withIgnoreLeadingWhiteSpace(true)
-                        .build();
+            CsvToBean<Airport> csvToBean = new CsvToBeanBuilder<Airport>(reader)
+                    .withMappingStrategy(strategy)
+                    .withType(Airport.class)
+                    .withSeparator(',')
+                    .withIgnoreQuotations(true)
+                    .withIgnoreLeadingWhiteSpace(true)
+                    .build();
 
-                List<Airport> airports = csvToBean.parse();
-                model.put("airports", airports);
-
-                // save users list on model
-                //                model.addAttribute("users", airports);
-                //                model.addAttribute("status", true);
-
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                //                model.addAttribute("message", "An error occurred while processing the CSV file.");
-                //                model.addAttribute("status", false);
+            String field = fields[col];
+            String prefixLowerCase = prefix.toLowerCase();
+            Iterator<Airport> airportIterator = csvToBean.iterator();
+            ArrayList<Airport> airports = new ArrayList<>();
+            while(airportIterator.hasNext()) {
+                Airport airport = airportIterator.next();
+                if (airport.getFieldByName(field).toLowerCase().startsWith(prefixLowerCase)) {
+                    airports.add(airport);
+                }
             }
+            airports.sort(new Comparator<Airport>() {
+                @Override
+                public int compare(Airport a1, Airport a2) {
+                    return a1.getFieldByName(field).compareTo((a2.getFieldByName(field)));
+                }
+            });
+            model.addAttribute("airports", airports);
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
         return "file-upload-status";
     }
