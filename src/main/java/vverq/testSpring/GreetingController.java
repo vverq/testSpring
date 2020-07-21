@@ -20,18 +20,21 @@ public class GreetingController {
         return "index";
     }
 
-    @PostMapping("/upload-csv-file")
-    public String uploadCSVFile(
+    @PostMapping("/airports")
+    public String searchAirports(
             @RequestParam("col") int col, @RequestParam("prefix") String prefix, Model model) {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
-                new FileInputStream(".\\src\\main\\resources\\1.csv"), StandardCharsets.UTF_8))) {
+        String[] fields = {
+                "id", "name", "city", "country", "IATA", "ICAO",
+                "latitude", "longitude", "altitude", "timezone",
+                "DST", "ianaTZ", "type", "source"
+        };
+        String field = fields[col-1];
+        ArrayList<Airport> airports = new ArrayList<>();
+        String prefixLowerCase = prefix.toLowerCase();
 
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                new FileInputStream(".\\src\\main\\resources\\airports.csv"), StandardCharsets.UTF_8))) {
             ColumnPositionMappingStrategy<Airport> strategy = new ColumnPositionMappingStrategy<>();
-            String[] fields = {
-                    "id", "name", "city", "country", "IATA", "ICAO",
-                    "latitude", "longitude", "altitude", "timezone",
-                    "DST", "ianaTZ", "type", "source"
-            };
             strategy.setType(Airport.class);
             strategy.setColumnMapping(fields);
 
@@ -43,10 +46,7 @@ public class GreetingController {
                     .withIgnoreLeadingWhiteSpace(true)
                     .build();
 
-            String field = fields[col];
-            String prefixLowerCase = prefix.toLowerCase();
             Iterator<Airport> airportIterator = csvToBean.iterator();
-            ArrayList<Airport> airports = new ArrayList<>();
             while(airportIterator.hasNext()) {
                 Airport airport = airportIterator.next();
                 if (airport.getFieldByName(field).toLowerCase().startsWith(prefixLowerCase)) {
@@ -63,6 +63,6 @@ public class GreetingController {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        return "file-upload-status";
+        return "airports";
     }
 }

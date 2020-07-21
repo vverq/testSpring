@@ -1,13 +1,11 @@
 <html>
 <body>
-    <form method="POST" action=/upload-csv-file enctype="multipart/form-data">
-    <div class="form-group mt-3">
-        <label for="col">Select a col number plz</label>
-        <input type="number" min=1 max=14 name="col" id="col"><br>
-        <label for="prefix">Input your prefix</label>
-        <input type="text" name="prefix" id="prefix"><br>
-    </div>
-    <button type="submit" class="btn btn-primary">Найти!</button>
+    <form method="POST" action=/airports enctype="multipart/form-data">
+    <p><label for="col">Select a column number:</label>
+    <input type="number" min=1 max=14 name="col" id="col"><br></p>
+    <p><label for="prefix">Input your prefix:</label>
+    <input type="text" name="prefix" id="prefix"><br></p>
+    <button type="submit" class="btn btn-primary">Search!</button>
 </form>
 </body>
 </html>
